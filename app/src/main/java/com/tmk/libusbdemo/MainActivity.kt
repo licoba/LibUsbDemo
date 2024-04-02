@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
 
         // Example of a call to a native method
         binding.sampleText.text = LibUsb().sayHello()
+        binding.sampleText.text = HidApi().sayHello()
     }
 
 
