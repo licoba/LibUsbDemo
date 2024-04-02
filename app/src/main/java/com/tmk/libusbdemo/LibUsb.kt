@@ -6,7 +6,7 @@ class LibUsb {
     companion object {
         // Used to load the 'libusbdemo' library on application startup.
         init {
-            System.loadLibrary("libusbdemo")
+            System.loadLibrary("usbdemo")
         }
     }
 }
