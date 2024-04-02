@@ -1,15 +1,10 @@
 
-# 设置项目所需的最小CMake版本。
 cmake_minimum_required(VERSION 3.22.1)
-
-# 设置项目名称
 project("libusb")
-
-
 # 将子目录的头文件包含到目标中
 include_directories(os .)
-
-add_library(${CMAKE_PROJECT_NAME} SHARED
+# 生成动态库的名称、类型、资源文件
+add_library(libusb SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
         core.c
         descriptor.c
@@ -27,7 +22,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 # Specifies libraries CMake should link to your target library. You
 # can link libraries from various origins, such as libraries defined in this
 # build script, prebuilt third-party libraries, or Android system libraries.
-target_link_libraries(${CMAKE_PROJECT_NAME}
+target_link_libraries(libusb
         # List libraries link to the target library
         android
         log)
