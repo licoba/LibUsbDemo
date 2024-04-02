@@ -46,6 +46,10 @@ android {
 
 dependencies {
 
+
+    implementation("com.blankj:utilcodex:1.31.1")
+    implementation("com.github.kongzue.DialogX:DialogX:0.0.48")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
