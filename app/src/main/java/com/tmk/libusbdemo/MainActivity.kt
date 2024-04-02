@@ -16,19 +16,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Example of a call to a native method
-        binding.sampleText.text = stringFromJNI()
+        binding.sampleText.text = LibUsb().sayHello()
     }
 
-    /**
-     * A native method that is implemented by the 'libusbdemo' native library,
-     * which is packaged with this application.
-     */
-    external fun stringFromJNI(): String
 
-    companion object {
-        // Used to load the 'libusbdemo' library on application startup.
-        init {
-            System.loadLibrary("libusbdemo")
-        }
-    }
+
 }

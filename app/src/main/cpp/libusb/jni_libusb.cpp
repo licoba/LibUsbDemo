@@ -1,7 +1,6 @@
 
 
 #include <jni.h>
-#include "unrooted_android.h"
 #include "libusb.h"
 #include <android/log.h>
 #include <jni.h>
@@ -14,7 +13,7 @@ int verbose = 0;
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_tmk_tmkusbdemo_LibUsb_sayHello(JNIEnv *env, jobject ) {
+Java_com_tmk_libusbdemo_LibUsb_sayHello(JNIEnv *env, jobject ) {
     std::string hello = "I am libusb, hello! ";
     return env->NewStringUTF(hello.c_str());
 }

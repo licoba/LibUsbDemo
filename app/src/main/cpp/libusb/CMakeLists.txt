@@ -21,6 +21,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         os/events_posix.c
         os/threads_posix.c
         os/linux_netlink.c
+        jni_libusb.cpp
         )
 
 # Specifies libraries CMake should link to your target library. You

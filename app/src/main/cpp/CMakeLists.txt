@@ -31,6 +31,7 @@ project("libusbdemo")
 #        native-lib.cpp)
 # 添加子目录
 add_subdirectory(libusb)
+#add_subdirectory(hidapi)
 
 # Specifies libraries CMake should link to your target library. You
 # can link libraries from various origins, such as libraries defined in this
