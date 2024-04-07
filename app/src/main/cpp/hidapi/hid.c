@@ -21,6 +21,7 @@
 ********************************************************/
 
 #define _GNU_SOURCE /* needed for wcsdup() before glibc 2.10 */
+#define DEBUG_PRINTF
 
 /* C */
 #include <stdio.h>
@@ -485,10 +486,13 @@ int HID_API_EXPORT hid_init(void)
 	if (!usb_context) {
 		const char *locale;
 
+        int ret = libusb_init(&usb_context);
 		/* Init Libusb */
-		if (libusb_init(&usb_context))
-			return -1;
-
+		if (ret!=0) {
+            LOG("libusb_init faild, return -1");
+//            return -1;
+            return ret;
+        }
 		/* Set the locale if it's not set. */
 		locale = setlocale(LC_CTYPE, NULL);
 		if (!locale)

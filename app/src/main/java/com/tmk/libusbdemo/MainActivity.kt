@@ -1,14 +1,12 @@
 package com.tmk.libusbdemo
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import com.blankj.utilcode.util.SPUtils
 import com.tmk.libusbdemo.MyUtil.showToast
 import com.tmk.libusbdemo.databinding.ActivityMainBinding
-import kotlin.math.PI
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,16 +24,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        usb = USBHIDReader(this)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        usb = USBHIDReader(this)
+        Log.d(TAG, usb.listUsbDevices())
 
         binding.sampleText.text = LibUsb().sayHello()
         binding.sampleText.text = hidApi.getHidApiVersion()
         initListener()
-        VID = SPUtils.getInstance().getString(KEY_VID,"0").toInt()
-        PID = SPUtils.getInstance().getString(KEY_PID,"0").toInt()
+        VID = SPUtils.getInstance().getString(KEY_VID, "0").toInt()
+        PID = SPUtils.getInstance().getString(KEY_PID, "0").toInt()
         binding.etPid.setText(PID.toString())
         binding.etVid.setText(VID.toString())
     }
@@ -49,6 +47,34 @@ class MainActivity : AppCompatActivity() {
         binding.etVid.doOnTextChanged { text, _, _, _ ->
             SPUtils.getInstance().put(KEY_VID, text.toString().trim())
         }
+        binding.btnJavaOpen.setOnClickListener {
+            javaOpenDevice()
+        }
+        binding.btnLibusbInit.setOnClickListener {
+            hidInit()
+        }
+    }
+
+    private fun hidInit() {
+        val fd = javaOpenDevice()
+        val name =  hidApi.hidInitNativeDevice(fd)
+        Log.d(TAG, "hidInit: $name")
+    }
+
+    private fun javaOpenDevice(): Int {
+        val device = usb.usbManager.deviceList.values.find {
+            it.vendorId == VID && it.productId == PID
+        }
+        if (device == null) {
+            showToast("没找到指定设备")
+            return -1
+        }
+        val conn = usb.usbManager.openDevice(device)
+        Log.d(TAG, "打开设备结果：$conn")
+        val interFace = device.getInterface(0)
+        val claimRet = conn.claimInterface(interFace, true)
+        Log.d(TAG, "声明接口：$claimRet")
+        return conn.fileDescriptor
     }
 
     private fun getDeviceList() {
@@ -63,8 +89,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-    private fun reqPermission(){
+    private fun reqPermission() {
         val device = usb.usbManager.deviceList.values.find {
             it.vendorId == VID && it.productId == PID
         }

@@ -5,17 +5,45 @@
 #include <jni.h>
 #include <string>
 #include "hidapi.h"
+#include "libusb.h"
+#include "../libusb_utils.h"
 
 #define  LOG_TAG    "LibUsb"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 
-int verbose = 0;
+
 
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_tmk_libusbdemo_HidApi_sayHello(JNIEnv *env, jobject ) {
     std::string hello = "I am hidapi, hello! ";
     return env->NewStringUTF(hello.c_str());
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_tmk_libusbdemo_HidApi_hidInit(JNIEnv *env, jobject ) {
+    libusb_set_option(nullptr, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);        //
+    return hid_init();
+}
+
+
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_tmk_libusbdemo_HidApi_hidInitNativeDevice(JNIEnv *env, jobject, jint fileDescriptor ) {
+    libusb_context *ctx;
+    libusb_device_handle *devh;
+    int r = 0;
+
+    libusb_set_option(nullptr, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);        //
+    libusb_init(nullptr);
+    libusb_wrap_sys_device(nullptr, (intptr_t)fileDescriptor, &devh);
+
+    auto device = libusb_get_device(devh);
+    print_device(device, devh);
+    std::string deviceName = get_device_name(device, devh);
+    return env->NewStringUTF(deviceName.c_str());
 }
 
 

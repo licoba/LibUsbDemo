@@ -107,7 +107,7 @@ class USBHIDReader(var context: Context) {
     }
 
 
-    private fun openDevice(): Boolean {
+    fun openDevice(): Boolean {
         if (usbHidInterface == null) {
             Log.e(TAG, "Usb接口为空，打开设备失败")
             return false

@@ -2565,7 +2565,6 @@ err_free_ctx:
 	free(_ctx);
 
 	usbi_mutex_static_unlock(&default_context_lock);
-
 	return r;
 }
 
