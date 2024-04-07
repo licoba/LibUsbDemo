@@ -4,9 +4,13 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.lifecycleScope
 import com.blankj.utilcode.util.SPUtils
+import com.tmk.libserialhelper.serialport.DataConversion.encodeHexString
 import com.tmk.libusbdemo.MyUtil.showToast
 import com.tmk.libusbdemo.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,7 +43,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initListener() {
-        binding.btnGetDeviceList.setOnClickListener { getDeviceList() }
         binding.btnPermission.setOnClickListener { reqPermission() }
         binding.etPid.doOnTextChanged { text, _, _, _ ->
             SPUtils.getInstance().put(KEY_PID, text.toString().trim())
@@ -47,18 +50,33 @@ class MainActivity : AppCompatActivity() {
         binding.etVid.doOnTextChanged { text, _, _, _ ->
             SPUtils.getInstance().put(KEY_VID, text.toString().trim())
         }
-        binding.btnJavaOpen.setOnClickListener {
-            javaOpenDevice()
-        }
-        binding.btnLibusbInit.setOnClickListener {
-            hidInit()
+        binding.btnLibusbInit.setOnClickListener { hidInit() }
+        binding.btnLibusbRead.setOnClickListener { hidRead() }
+    }
+
+
+    var count = 0
+    var tempStr = ""
+    private fun hidRead() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            while (true) {
+                val ret = hidApi.hidReadData(64)
+                val hexStr = encodeHexString(ret)
+                tempStr += hexStr.substring(0,4) + " "
+                if(++count == 16){
+                    count = 0
+                    Log.d(TAG, "读取结果: ${tempStr}")
+                    tempStr = ""
+                }
+            }
         }
     }
 
     private fun hidInit() {
         val fd = javaOpenDevice()
-        val name =  hidApi.hidInitNativeDevice(fd)
+        val name = hidApi.hidInitNativeDevice(fd, 3)
         Log.d(TAG, "hidInit: $name")
+        showToast("名称: $name")
     }
 
     private fun javaOpenDevice(): Int {
@@ -71,21 +89,10 @@ class MainActivity : AppCompatActivity() {
         }
         val conn = usb.usbManager.openDevice(device)
         Log.d(TAG, "打开设备结果：$conn")
-        val interFace = device.getInterface(0)
-        val claimRet = conn.claimInterface(interFace, true)
-        Log.d(TAG, "声明接口：$claimRet")
+//        val interFace = device.getInterface(0)
+//        val claimRet = conn.claimInterface(interFace, true)
+//        Log.d(TAG, "声明接口：$claimRet")
         return conn.fileDescriptor
-    }
-
-    private fun getDeviceList() {
-//        val list = hidApi.getHidDeviceList()
-//        list.forEach {
-//            Log.d(TAG, "Hid设备：$it")
-//        }
-        VID = binding.etVid.text.toString().trim().toInt()
-        PID = binding.etPid.text.toString().trim().toInt()
-        val hidDeviceInfo = hidApi.enumerateDevices(VID, PID)
-        Log.d(TAG, "Hid设备：$hidDeviceInfo")
     }
 
 

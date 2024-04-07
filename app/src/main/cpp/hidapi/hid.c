@@ -30,6 +30,7 @@
 #include <ctype.h>
 #include <locale.h>
 #include <errno.h>
+#include <android/log.h>
 
 /* Unix */
 #include <unistd.h>
@@ -61,7 +62,7 @@ extern "C" {
 #endif
 
 #ifdef DEBUG_PRINTF
-#define LOG(...) fprintf(stderr, __VA_ARGS__)
+#define LOG(...) __android_log_print(ANDROID_LOG_DEBUG, "LOG_HID", __VA_ARGS__)
 #else
 #define LOG(...) do {} while (0)
 #endif
@@ -1343,9 +1344,12 @@ HID_API_EXPORT hid_device * HID_API_CALL hid_libusb_wrap_sys_device(intptr_t sys
 	int res = 0;
 	int j = 0, k = 0;
 
-	if(hid_init() < 0)
-		return NULL;
+	if(hid_init() < 0) {
+        LOG("hid_init null nullnullnullnullnullnullnull");
+        return NULL;
+    }
 
+    LOG("hid_init ddddddddd");
 	dev = new_hid_device();
 
 	res = libusb_wrap_sys_device(usb_context, sys_dev, &dev->device_handle);
