@@ -7,9 +7,11 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
 import com.blankj.utilcode.util.SPUtils
 import com.tmk.libserialhelper.serialport.DataConversion.encodeHexString
+import com.tmk.libserialhelper.serialport.c2HexString
 import com.tmk.libusbdemo.MyUtil.showToast
 import com.tmk.libusbdemo.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -32,7 +34,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         usb = USBHIDReader(this)
         Log.d(TAG, usb.listUsbDevices())
-
         binding.sampleText.text = LibUsb().sayHello()
         binding.sampleText.text = hidApi.getHidApiVersion()
         initListener()
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnLibusbInit.setOnClickListener { hidInit() }
         binding.btnLibusbRead.setOnClickListener { hidRead() }
+        binding.btnLibusbWrite.setOnClickListener { hidWrite() }
     }
 
 
@@ -61,13 +63,31 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             while (true) {
                 val ret = hidApi.hidReadData(64)
-                val hexStr = encodeHexString(ret)
-                tempStr += hexStr.substring(0,4) + " "
-                if(++count == 16){
+//                if (ret.isEmpty()) {
+//                    continue
+//                }
+                val hexStr = ret.c2HexString()
+//                Log.d(TAG, "读取结果: ${hexStr}")
+                tempStr += hexStr.substring(0, 2) + " "
+                if (++count == 4) {
                     count = 0
                     Log.d(TAG, "读取结果: ${tempStr}")
                     tempStr = ""
                 }
+            }
+        }
+    }
+
+
+    var mCount = 1
+    val byteArray = ByteArray(64)
+    private fun hidWrite() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            // 创建一个64字节的数据
+            while (true){
+                byteArray[0] = mCount++.toByte()
+                val ret = hidApi.hidWriteData(byteArray)
+                Log.d(TAG, "hidWrite: $ret")
             }
         }
     }
@@ -89,10 +109,11 @@ class MainActivity : AppCompatActivity() {
         }
         val conn = usb.usbManager.openDevice(device)
         Log.d(TAG, "打开设备结果：$conn")
-//        val interFace = device.getInterface(0)
-//        val claimRet = conn.claimInterface(interFace, true)
-//        Log.d(TAG, "声明接口：$claimRet")
+        val interFace = device.getInterface(5)
+        val claimRet = conn.claimInterface(interFace, true)
+        Log.d(TAG, "声明接口：$claimRet")
         return conn.fileDescriptor
+
     }
 
 

@@ -192,3 +192,12 @@ fun Short.toHex(): String = "%04x".format(this).uppercase()
 fun UByte.toHex(): String = "%02x".format(toInt()).uppercase()
 fun UInt.toHex(): String = "%08x".format(toInt()).uppercase()
 fun UShort.toHex(): String = this.toUInt().toHex()
+
+
+fun ByteArray.c2HexString(): String {
+    val builder = StringBuilder()
+    for (byte in this) {
+        builder.append(String.format("%02x", byte))
+    }
+    return builder.toString().uppercase()
+}

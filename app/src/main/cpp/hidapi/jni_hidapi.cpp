@@ -56,27 +56,28 @@ Java_com_tmk_libusbdemo_HidApi_getHidApiVersion(JNIEnv *env, jobject) {
 }
 
 
-
 // 读取Hid设备数据
 extern "C"
 JNIEXPORT jbyteArray JNICALL
 Java_com_tmk_libusbdemo_HidApi_hidReadData(JNIEnv *env, jobject obj, jint length) {
-    // Get the hid_device object from the pointer
-
-    // Allocate a buffer to store the data
     unsigned char *data = new unsigned char[length];
-
-    // Read data from the device
     int bytesRead = hid_read(mHidDevice, data, length);
-
-    // Create a Java byte array to store the data
     jbyteArray dataArray = env->NewByteArray(bytesRead);
-
-    // Copy the data to the Java byte array
     env->SetByteArrayRegion(dataArray, 0, bytesRead, (jbyte *) data);
-
-    // Free the buffer
     delete[] data;
-
     return dataArray;
+}
+
+
+
+// 往Hid设备写数据
+extern "C"
+JNIEXPORT int JNICALL Java_com_tmk_libusbdemo_HidApi_hidWriteData(
+        JNIEnv *env, jobject obj, jbyteArray data) {
+    jsize length = env->GetArrayLength(data);
+    unsigned char *buffer = new unsigned char[length];
+    env->GetByteArrayRegion(data, 0, length, (jbyte *) buffer);
+    int ret = hid_write(mHidDevice, buffer, length);
+    delete[] buffer;
+    return ret;
 }
